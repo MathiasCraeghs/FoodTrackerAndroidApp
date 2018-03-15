@@ -5,23 +5,42 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.w3c.dom.Text;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Scanner;
+
+import static android.widget.Toast.*;
 
 public class MainActivity extends AppCompatActivity {
     private Button button;
@@ -29,7 +48,19 @@ public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Cursor mCursor;
-    private String sample_response = "com.google.android.geo.API_KEY";
+
+    private String googleSearchResults;
+    private double latitude;
+    private double longitude;
+    private double radius =5000;
+
+    private RestaurantAdapter adapter;
+    private RecyclerView mNumberList;
+    private NetworkUtils mNetworkUtils;
+
+
+    final String Google_Places_URL =
+            "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.154907,5.383397&radius=5000&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
 
 
 
@@ -38,16 +69,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mCursor = getJSONCursor(sample_response);
+
+
          button =  (Button) findViewById(R.id.tv_location);
         configureButton();
-         textView=  (TextView) findViewById(R.id.textView) ;
+
+        makeGoogleSearchQuery();
+        mNumberList = (RecyclerView) findViewById(R.id.rv_numbers) ;
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        mNumberList.setLayoutManager(layoutManager);
+        mNumberList.setHasFixedSize(true);
+        adapter = new RestaurantAdapter(MainActivity.this, mCursor);
+        mNumberList.setAdapter(adapter);
+
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                textView.append("\n" +location.getLatitude() +" "+location.getLongitude());
+                latitude = location.getLatitude();
+                longitude= location.getLongitude();
+
+
+
             }
 
             @Override
@@ -77,7 +121,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             configureButton();
         }
-        //locationManager.requestLocationUpdates("gps", 60000, 0, locationListener);
+
+
     }
 
     @Override
@@ -92,9 +137,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void configureButton() {
         button.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
-                locationManager.requestLocationUpdates("gps", 0, 0, locationListener);
+                locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
 
             }
         });
@@ -110,4 +156,54 @@ public class MainActivity extends AppCompatActivity {
         }
         return null;
     }
+    public double getLatitude(){
+        return latitude;
+    }
+
+    public double getLongitude(){
+        return longitude;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+
+    private void makeGoogleSearchQuery() {
+        URL googleSearchUrl = mNetworkUtils.buildUrl(Google_Places_URL);
+
+        new GoogleQueryTask().execute(googleSearchUrl);
+    }
+
+
+    public class GoogleQueryTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected String doInBackground(URL... params) {
+            URL searchUrl = params[0];
+
+            try {
+                googleSearchResults = mNetworkUtils.getResponseFromHttpUrl(searchUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mCursor = getJSONCursor(googleSearchResults);
+
+            return googleSearchResults;
+        }
+
+     /*   // COMPLETED (3) Override onPostExecute to display the results in the TextView
+        @Override
+        protected void onPostExecute(String githubSearchResults) {
+            if (githubSearchResults != null && !githubSearchResults.equals("")) {
+                mSearchResultsTextView.setText(githubSearchResults);
+            }
+        }
+     */
+    }
+
+
+
+
+
 }
