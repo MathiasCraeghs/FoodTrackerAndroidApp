@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     final String Google_Places_URL =
-            "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.154907,5.383397&radius=5000&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
+            "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.154907,5.383397&radius=2000&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
 
 
 
@@ -75,11 +75,15 @@ public class MainActivity extends AppCompatActivity {
        //  button =  (Button) findViewById(R.id.tv_location);
       //  configureButton();
 
-        makeGoogleSearchQuery();
+
         mNumberList = (RecyclerView) findViewById(R.id.rv_numbers) ;
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mNumberList.setLayoutManager(layoutManager);
         mNumberList.setHasFixedSize(true);
+        URL googleSearchUrl = mNetworkUtils.buildUrl(Google_Places_URL);
+
+        new GoogleQueryTask().execute(googleSearchUrl);
+     //   makeGoogleSearchQuery();
        // adapter = new RestaurantAdapter(MainActivity.this, mCursor);
      //   mNumberList.setAdapter(adapter);
 
@@ -149,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
     }
     private Cursor getJSONCursor(String response){
         try{
+            Log.i("main", response);
             JSONArray array = new JSONArray(response);
             return new JSONArrayCursor(array);
         } catch(JSONException exception)
@@ -184,17 +189,38 @@ public class MainActivity extends AppCompatActivity {
             URL searchUrl = params[0];
 
             try {
-                googleSearchResults = mNetworkUtils.getResponseFromHttpUrl(searchUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
+                HttpURLConnection conn = (HttpURLConnection) params[0].openConnection();
+                InputStream in = conn.getInputStream();
+                String line, text;
+                text = "";
+                byte[] byteArray = new byte[1024];
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in), byteArray.length);
+                while((line = reader.readLine()) != null){
+                    text = text + line;
+                }
+                googleSearchResults = text;
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
-          //  mCursor = getJSONCursor(googleSearchResults);
-            Log.i("Main", googleSearchResults);
+            Log.i("main", googleSearchResults);
+            int start, end;
+            start = googleSearchResults.indexOf("[      {");
+            end = googleSearchResults.indexOf("}   ]");
+            Log.i("main", start +" "+ end);
+            if(start == -1 && end == -1) {
+                start = googleSearchResults.indexOf("[{");
+                end = googleSearchResults.indexOf("}]");
+                Log.i("main", start +" "+ end);
+            }
+            googleSearchResults = googleSearchResults.substring(start,end)+"}]";
+
+            //  mCursor = getJSONCursor(googleSearchResults);
 
             return googleSearchResults;
         }
 
-       // COMPLETED (3) Override onPostExecute to display the results in the TextView
+
+        // COMPLETED (3) Override onPostExecute to display the results in the TextView
         @Override
         protected void onPostExecute(String googleSearchResults) {
             if (googleSearchResults != null && !googleSearchResults.equals("")) {

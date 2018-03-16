@@ -16,11 +16,10 @@ import android.widget.TextView;
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.RestaurantAdapterViewHolder> {
     private Context mContext;
     private Cursor mCursor;
-    private String mRestaurantData;
     public RestaurantAdapter(Context context, Cursor cursor){
 
         this.mContext = context;
-        this.mCursor = cursor;;
+        this.mCursor = cursor;
 
     }
 
@@ -43,20 +42,16 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
     public void onBindViewHolder(RestaurantAdapterViewHolder holder, int position) {
         String name;
         name= mCursor.getString(mCursor.getColumnIndex("name"));
-        Log.i("adapter",name);
         holder.listItemNumberView.setText(name);
     }
 
     @Override
     public int getItemCount() {
 
-        if(mCursor == null) return 0;
+       // if(mCursor == null) return 0;
         return mCursor.getCount();
     }
 
-   // public void setRestaurantData(String data){
-       // mRestaurantData=data;
-    //}
 
     class RestaurantAdapterViewHolder extends RecyclerView.ViewHolder{
         TextView listItemNumberView;

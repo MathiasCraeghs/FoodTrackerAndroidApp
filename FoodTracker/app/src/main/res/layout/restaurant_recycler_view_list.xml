@@ -8,6 +8,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/tv_item_number"
         android:fontFamily="monospace"
-        android:textSize="42sp"/>
+        android:textSize="20sp"/>
 
 </FrameLayout>
