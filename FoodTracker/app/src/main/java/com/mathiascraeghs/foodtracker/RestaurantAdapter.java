@@ -16,7 +16,7 @@ import android.widget.TextView;
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.RestaurantAdapterViewHolder> {
     private Context mContext;
     private Cursor mCursor;
-    private int mNumberItems;
+    private String mRestaurantData;
     public RestaurantAdapter(Context context, Cursor cursor){
 
         this.mContext = context;
@@ -43,6 +43,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
     public void onBindViewHolder(RestaurantAdapterViewHolder holder, int position) {
         String name;
         name= mCursor.getString(mCursor.getColumnIndex("name"));
+        Log.i("adapter",name);
         holder.listItemNumberView.setText(name);
     }
 
@@ -53,15 +54,18 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         return mCursor.getCount();
     }
 
+   // public void setRestaurantData(String data){
+       // mRestaurantData=data;
+    //}
+
     class RestaurantAdapterViewHolder extends RecyclerView.ViewHolder{
         TextView listItemNumberView;
 
         public RestaurantAdapterViewHolder(View view) {
             super(view);
+
             listItemNumberView = (TextView) view.findViewById(R.id.tv_item_number);
-        }
-        void bind(int listIndex){
-            listItemNumberView.setText(String.valueOf(listIndex));
+
         }
     }
 

@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -71,16 +72,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-         button =  (Button) findViewById(R.id.tv_location);
-        configureButton();
+       //  button =  (Button) findViewById(R.id.tv_location);
+      //  configureButton();
 
         makeGoogleSearchQuery();
         mNumberList = (RecyclerView) findViewById(R.id.rv_numbers) ;
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mNumberList.setLayoutManager(layoutManager);
         mNumberList.setHasFixedSize(true);
-        adapter = new RestaurantAdapter(MainActivity.this, mCursor);
-        mNumberList.setAdapter(adapter);
+       // adapter = new RestaurantAdapter(MainActivity.this, mCursor);
+     //   mNumberList.setAdapter(adapter);
 
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -187,19 +188,22 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            mCursor = getJSONCursor(googleSearchResults);
+          //  mCursor = getJSONCursor(googleSearchResults);
+            Log.i("Main", googleSearchResults);
 
             return googleSearchResults;
         }
 
-     /*   // COMPLETED (3) Override onPostExecute to display the results in the TextView
+       // COMPLETED (3) Override onPostExecute to display the results in the TextView
         @Override
-        protected void onPostExecute(String githubSearchResults) {
-            if (githubSearchResults != null && !githubSearchResults.equals("")) {
-                mSearchResultsTextView.setText(githubSearchResults);
+        protected void onPostExecute(String googleSearchResults) {
+            if (googleSearchResults != null && !googleSearchResults.equals("")) {
+                mCursor = getJSONCursor(googleSearchResults);
+                adapter =new RestaurantAdapter(MainActivity.this, mCursor);
+                mNumberList.setAdapter(adapter);
             }
         }
-     */
+
     }
 
 
