@@ -2,6 +2,7 @@ package com.mathiascraeghs.foodtracker;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -53,17 +54,11 @@ public class MainActivity extends AppCompatActivity {
     private String googleSearchResults;
     private double latitude;
     private double longitude;
-    private double radius =5000;
+    private double radius = 5000;
 
     private RestaurantAdapter adapter;
     private RecyclerView mNumberList;
     private NetworkUtils mNetworkUtils;
-
-
-    final String Google_Places_URL =
-            "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.154907,5.383397&radius=2000&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
-
-
 
     @SuppressLint("CutPasteId")
     @Override
@@ -72,85 +67,46 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-       //  button =  (Button) findViewById(R.id.tv_location);
-      //  configureButton();
-
-
-        mNumberList = (RecyclerView) findViewById(R.id.rv_numbers) ;
+        mNumberList = (RecyclerView) findViewById(R.id.rv_numbers);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mNumberList.setLayoutManager(layoutManager);
-        mNumberList.setHasFixedSize(true);
-        URL googleSearchUrl = mNetworkUtils.buildUrl(Google_Places_URL);
 
-        new GoogleQueryTask().execute(googleSearchUrl);
-     //   makeGoogleSearchQuery();
-       // adapter = new RestaurantAdapter(MainActivity.this, mCursor);
-     //   mNumberList.setAdapter(adapter);
+        locationManager = (LocationManager) getSystemService(Service.LOCATION_SERVICE);
+        getLocation();
+        Log.i("coord", Double.toString(latitude));
+        Log.i("coord", Double.toString(longitude));
+        String URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+getLatitude()+","+getLongitude()+"&radius="+getRadius()+"&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
 
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                latitude = location.getLatitude();
-                longitude= location.getLongitude();
-
-
-
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        };
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        requestPermissions(new String[]{
-                                Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.INTERNET
-                        }, 10);
-                        return;
-            }
-        } else {
-            configureButton();
+        try {
+            new GoogleQueryTask().execute(new URL(Uri.parse(URL).toString()));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
 
-
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    switch (requestCode) {
-        case 10:
-            if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+    private void getLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.INTERNET
+                }, 10);
+                Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
             }
-     }
+            Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            update(loc);
+        }
+    }
+    private void update(Location loc)
+    {
+        latitude = loc.getLatitude();
+        longitude= loc.getLongitude();
+
     }
 
-    private void configureButton() {
-        button.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
-                locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
-
-            }
-        });
-
-    }
     private Cursor getJSONCursor(String response){
         try{
             Log.i("main", response);
@@ -175,14 +131,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void makeGoogleSearchQuery() {
-        URL googleSearchUrl = mNetworkUtils.buildUrl(Google_Places_URL);
-
-        new GoogleQueryTask().execute(googleSearchUrl);
-    }
-
-
-    public class GoogleQueryTask extends AsyncTask<URL, Void, String> {
+     public class GoogleQueryTask extends AsyncTask<URL, Void, String> {
 
         @Override
         protected String doInBackground(URL... params) {
@@ -213,8 +162,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("main", start +" "+ end);
             }
             googleSearchResults = googleSearchResults.substring(start,end)+"}]";
-
-            //  mCursor = getJSONCursor(googleSearchResults);
 
             return googleSearchResults;
         }

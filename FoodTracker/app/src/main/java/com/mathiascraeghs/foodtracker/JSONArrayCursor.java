@@ -41,6 +41,7 @@ public class JSONArrayCursor extends AbstractCursor {
                     mJsonArray.put(tempObj);
                 }
             }
+
             initialize();
         }
     }

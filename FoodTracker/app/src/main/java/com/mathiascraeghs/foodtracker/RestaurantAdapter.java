@@ -1,12 +1,14 @@
 package com.mathiascraeghs.foodtracker;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -40,27 +42,70 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
     @Override
     public void onBindViewHolder(RestaurantAdapterViewHolder holder, int position) {
+      if(!mCursor.moveToPosition(position)) return;
         String name;
+        int score;
         name= mCursor.getString(mCursor.getColumnIndex("name"));
+        score=  mCursor.getInt(mCursor.getColumnIndex("rating"));
         holder.listItemNumberView.setText(name);
+        if(score <= 1){
+            holder.scoreView.setImageResource(R.drawable.worst);
+        }
+        else if(score>1 &&score <=2){
+            holder.scoreView.setImageResource(R.drawable.bad);
+
+        }
+        else if(score>2 &&score <=3){
+            holder.scoreView.setImageResource(R.drawable.medium);
+        }
+        else if(score>3 &&score <=4){
+            holder.scoreView.setImageResource(R.drawable.good);
+        }
+        else{
+            holder.scoreView.setImageResource(R.drawable.best);
+        }
+
     }
 
     @Override
     public int getItemCount() {
 
-       // if(mCursor == null) return 0;
+       if(mCursor == null) return 0;
         return mCursor.getCount();
     }
 
 
-    class RestaurantAdapterViewHolder extends RecyclerView.ViewHolder{
-        TextView listItemNumberView;
+    class RestaurantAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+      private  TextView listItemNumberView;
+      private ImageView scoreView;
 
         public RestaurantAdapterViewHolder(View view) {
             super(view);
 
             listItemNumberView = (TextView) view.findViewById(R.id.tv_item_number);
+            scoreView = (ImageView) view.findViewById(R.id.tv_id_score);
+            view.setOnClickListener(this);
+        }
 
+        @Override
+        public void onClick(View view) {
+            int adapterPosition= getAdapterPosition();
+            mCursor.moveToPosition(adapterPosition);
+            String address = mCursor.getString(mCursor.getColumnIndex("vicinity"));
+            Log.i("info",address.toString());
+            String nameRest = mCursor.getString(mCursor.getColumnIndex("name"));
+            Log.i("info",nameRest.toString());
+            int score =mCursor.getInt(mCursor.getColumnIndex("rating"));
+            Log.i("info",String.valueOf(score));
+
+            Intent intent = new Intent(mContext, ChildActivity.class);
+
+            intent.putExtra(mContext.getString(R.string.id_key), adapterPosition);
+            intent.putExtra(mContext.getString(R.string.name_key),nameRest);
+            intent.putExtra(mContext.getString(R.string.address_key),address);
+            intent.putExtra(mContext.getString(R.string.score_key),score);
+
+            mContext.startActivity(intent);
         }
     }
 
