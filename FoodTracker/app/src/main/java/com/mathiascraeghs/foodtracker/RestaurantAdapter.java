@@ -48,7 +48,10 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         name= mCursor.getString(mCursor.getColumnIndex("name"));
         score=  mCursor.getInt(mCursor.getColumnIndex("rating"));
         holder.listItemNumberView.setText(name);
-        if(score <= 1){
+        if(score ==0){
+            holder.scoreView.setImageResource(R.drawable.medium);
+        }
+        else if(score <= 1){
             holder.scoreView.setImageResource(R.drawable.worst);
         }
         else if(score>1 &&score <=2){
@@ -91,12 +94,19 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         public void onClick(View view) {
             int adapterPosition= getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
+
             String address = mCursor.getString(mCursor.getColumnIndex("vicinity"));
-            Log.i("info",address.toString());
             String nameRest = mCursor.getString(mCursor.getColumnIndex("name"));
+            String score =mCursor.getString(mCursor.getColumnIndex("rating"));
+            String latitude = mCursor.getString(mCursor.getColumnIndexOrThrow("geometry"));
+          //  String longitude =mCursor.getString(mCursor.getColumnIndex("lng"));
+
+
             Log.i("info",nameRest.toString());
-            int score =mCursor.getInt(mCursor.getColumnIndex("rating"));
+            Log.i("info",address.toString());
             Log.i("info",String.valueOf(score));
+            Log.i("info",latitude.toString());
+//            Log.i("info",longitude.toString());
 
             Intent intent = new Intent(mContext, ChildActivity.class);
 

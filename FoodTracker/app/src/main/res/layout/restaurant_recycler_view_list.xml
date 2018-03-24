@@ -3,21 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="16dp">
+ <RelativeLayout
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content">
+
+ </RelativeLayout>
 
     <TextView
+        android:id="@+id/tv_item_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tv_item_number"
         android:fontFamily="monospace"
-        android:textSize="20sp"/>
+        android:paddingLeft="20sp"
+        android:textSize="20sp" />
 
     <ImageView
         android:id="@+id/tv_id_score"
-        android:layout_width="47dp"
-        android:layout_height="20dp"
-        android:layout_marginRight="50dp"
-        android:layout_gravity="right"
-
-        android:adjustViewBounds="true"></ImageView>
-
+        android:layout_width="28dp"
+        android:layout_height="30dp"
+        android:layout_toLeftOf="@id/tv_item_number"
+        android:adjustViewBounds="true"
+        android:paddingRight="10sp"></ImageView>
 </FrameLayout>

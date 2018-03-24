@@ -13,18 +13,44 @@
            android:id="@+id/name"
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
-           android:textSize="24sp" />
+           android:textSize="24sp"
+           android:paddingLeft="5sp"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/address"
         android:layout_below="@+id/name"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:paddingLeft="5sp"/>
+
+       <TextView
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="rating: "
+           android:id="@+id/rating"
+           android:textSize="20sp"
+           android:paddingLeft="5sp"
+           android:layout_below="@+id/address"/>
      <TextView
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:id="@+id/score"
          android:layout_below="@+id/address"
-         android:textSize="18sp"/>
+         android:layout_toRightOf="@id/rating"
+         android:textSize="20sp"
+         android:paddingLeft="5sp"/>
+
+       <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+           android:id="@+id/map"
+           android:name="com.google.android.gms.maps.MapFragment"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_alignParentLeft="true"
+           android:layout_alignParentStart="true"
+           android:layout_below="@+id/rating" />
+
+
+
    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

@@ -45,10 +45,7 @@ import java.util.Scanner;
 import static android.widget.Toast.*;
 
 public class MainActivity extends AppCompatActivity {
-    private Button button;
-    private TextView textView;
     private LocationManager locationManager;
-    private LocationListener locationListener;
     private Cursor mCursor;
 
     private String googleSearchResults;
