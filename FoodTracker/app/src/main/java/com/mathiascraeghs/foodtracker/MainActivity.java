@@ -14,9 +14,11 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.preference.Preference;
@@ -34,6 +36,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.w3c.dom.Text;
@@ -48,19 +61,25 @@ import java.net.URL;
 import java.util.Scanner;
 
 import static android.widget.Toast.*;
+import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener  {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     private LocationManager locationManager;
     private Cursor mCursor;
 
     private String googleSearchResults;
+
+
+
     private double latitude;
     private double longitude;
-    private double radius=5000;
+    private double radius = 5000;
 
     private RestaurantAdapter adapter;
     private RecyclerView mNumberList;
     private NetworkUtils mNetworkUtils;
+
+    private LocationRequest mLocationRequest;
 
 
     @SuppressLint("CutPasteId")
@@ -74,19 +93,73 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mNumberList.setLayoutManager(layoutManager);
 
-        //locationManager = (LocationManager) getSystemService(Service.LOCATION_SERVICE);
-        //getLocation();
+        getLastLocation();
         setupSeekBarPreferences();
-        Log.i("coord", Double.toString(latitude));
-        Log.i("coord", Double.toString(longitude));
-        Log.i("radius", String.valueOf(radius));
-        String URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.154907,5.383397&radius="+getRadius()+"&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
 
+        Log.i("coord2", Double.toString(latitude));
+        Log.i("coord2", Double.toString(longitude));
+
+        Log.i("radius", String.valueOf(radius));
+        updateURL();
+
+    }
+
+    public void updateURL(){
+        String URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+getLatitude()+","+getLongitude()+"&radius="+getRadius()+"&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
+        Log.i("URL", URL);
         try {
             new GoogleQueryTask().execute(new URL(Uri.parse(URL).toString()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+    }
+
+
+
+    public void getLastLocation() {
+        // Get last known recent location using new Google Play Services SDK (v11+)
+        FusedLocationProviderClient locationClient = getFusedLocationProviderClient(this);
+
+        Log.i("getLocation", "trying to get last location");
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        Log.i("getlocation", "got last GPS location");
+                        // GPS location can be null if GPS is switched off
+                        if (location != null) {
+                            Log.i("getLocation", "last GPS location is not null");
+                            setLongitude(location.getLongitude());
+                            setLatitude(location.getLatitude());
+                            Log.i("coord", Double.toString(latitude));
+                            Log.i("coord", Double.toString(longitude));
+                       }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("getLocation", "Error trying to get last GPS location");
+                    }
+                });
+
+    }
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     private void setupSeekBarPreferences(){
@@ -100,34 +173,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         seekBarPreference.registerOnSharedPreferenceChangeListener(this);
     }
-
-    private void getLocation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.INTERNET
-                }, 10);
-                Location loc = null;
-                while(loc== null) {
-                    loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    latitude = loc.getLatitude();
-                    longitude = loc.getLongitude();
-                }
-            }
-            Location loc = null;
-            while(loc== null) {
-                loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                latitude = loc.getLatitude();
-                longitude = loc.getLongitude();
-
-            }
-
-
-        }
-    }
-
-
 
     private Cursor getJSONCursor(String response){
         try{
@@ -168,14 +213,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Log.i("radius" , String.valueOf(radius));
         if(radius <= 1000) radius =2000;
         Log.i("radius",String.valueOf(radius));
-
-        String URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.154907,5.383397&radius="+getRadius()+"&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
-
-        try {
-            new GoogleQueryTask().execute(new URL(Uri.parse(URL).toString()));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        getLastLocation();
+        updateURL();
 
     }
 
@@ -216,7 +255,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
 
 
-        // COMPLETED (3) Override onPostExecute to display the results in the TextView
         @Override
         protected void onPostExecute(String googleSearchResults) {
             if (googleSearchResults != null && !googleSearchResults.equals("")) {
