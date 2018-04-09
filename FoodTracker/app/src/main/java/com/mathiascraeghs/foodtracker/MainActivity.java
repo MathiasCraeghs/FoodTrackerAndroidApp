@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         mLocationMangager.requestLocationUpdates("gps", 60000, 0, mLocationListener);
         Location loc =mLocationMangager.getLastKnownLocation("gps");
         if(loc != null) {
-            setLongitude(loc.getLatitude());
+            setLatitude(loc.getLatitude());
             setLongitude(loc.getLongitude());
         }
         else{
