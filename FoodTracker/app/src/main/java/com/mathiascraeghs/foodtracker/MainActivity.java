@@ -64,11 +64,10 @@ import static android.widget.Toast.*;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private LocationManager locationManager;
+
     private Cursor mCursor;
 
     private String googleSearchResults;
-
 
 
     private double latitude;
@@ -79,7 +78,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private RecyclerView mNumberList;
     private NetworkUtils mNetworkUtils;
 
-    private LocationRequest mLocationRequest;
+    private LocationManager mLocationMangager;
+    private LocationListener mLocationListener;
 
 
     @SuppressLint("CutPasteId")
@@ -93,18 +93,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mNumberList.setLayoutManager(layoutManager);
 
-        getLastLocation();
+        getLocation();
         setupSeekBarPreferences();
 
-        Log.i("coord2", Double.toString(latitude));
-        Log.i("coord2", Double.toString(longitude));
+        Log.i("coord", Double.toString(getLatitude()));
+        Log.i("coord", Double.toString(getLongitude()));
 
         Log.i("radius", String.valueOf(radius));
         updateURL();
 
     }
 
-    public void updateURL(){
+    public void updateURL() {
         String URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+getLatitude()+","+getLongitude()+"&radius="+getRadius()+"&type=restaurant&key=AIzaSyAWp6MXdRMNjutTPL1qr-8EPX6UgEaU4ac";
         Log.i("URL", URL);
         try {
@@ -114,8 +114,68 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
+    public void getLocation(){
+        mLocationMangager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mLocationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                setLatitude(location.getLatitude());
+                setLongitude(location.getLongitude());
+            }
 
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
 
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        };
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.INTERNET
+                }, 10);
+                return;
+            }
+        } else {
+            mLocationMangager.requestLocationUpdates( LocationManager.NETWORK_PROVIDER, 60000, 0, mLocationListener);
+        }
+        mLocationMangager.requestLocationUpdates("gps", 60000, 0, mLocationListener);
+        Location loc =mLocationMangager.getLastKnownLocation("gps");
+        if(loc != null) {
+            setLongitude(loc.getLatitude());
+            setLongitude(loc.getLongitude());
+        }
+        else{
+            Location locNet =mLocationMangager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (locNet !=null){
+                setLatitude(locNet.getLatitude());
+                setLongitude(locNet.getLongitude());
+
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 10:
+                if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+                }
+        }
+    }
+/*
     public void getLastLocation() {
         // Get last known recent location using new Google Play Services SDK (v11+)
         FusedLocationProviderClient locationClient = getFusedLocationProviderClient(this);
@@ -154,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 });
 
     }
+    */
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
@@ -213,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Log.i("radius" , String.valueOf(radius));
         if(radius <= 1000) radius =2000;
         Log.i("radius",String.valueOf(radius));
-        getLastLocation();
+        getLocation();
         updateURL();
 
     }
