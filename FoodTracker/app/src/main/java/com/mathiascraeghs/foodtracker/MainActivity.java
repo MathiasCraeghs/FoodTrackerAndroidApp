@@ -59,6 +59,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.logging.Handler;
 
 import static android.widget.Toast.*;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
@@ -87,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
 
         mNumberList = (RecyclerView) findViewById(R.id.rv_numbers);
