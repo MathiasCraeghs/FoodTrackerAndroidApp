@@ -18,13 +18,14 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyARti3rMMjkBw6AlZcsZo-DifUwY22G_C0" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity"></activity>
         <activity
             android:name=".ChildActivity"
             android:label="Information">
