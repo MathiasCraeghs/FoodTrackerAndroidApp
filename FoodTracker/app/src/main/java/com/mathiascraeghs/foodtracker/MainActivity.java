@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         } else {
             mLocationMangager.requestLocationUpdates( LocationManager.NETWORK_PROVIDER, 60000, 0, mLocationListener);
         }
-        mLocationMangager.requestLocationUpdates("gps", 60000, 0, mLocationListener);
+        mLocationMangager.requestLocationUpdates("gps", 600000, 0, mLocationListener);
         Location loc =mLocationMangager.getLastKnownLocation("gps");
         if(loc != null) {
             setLatitude(loc.getLatitude());
@@ -175,46 +175,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 }
         }
     }
-/*
-    public void getLastLocation() {
-        // Get last known recent location using new Google Play Services SDK (v11+)
-        FusedLocationProviderClient locationClient = getFusedLocationProviderClient(this);
 
-        Log.i("getLocation", "trying to get last location");
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        locationClient.getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        Log.i("getlocation", "got last GPS location");
-                        // GPS location can be null if GPS is switched off
-                        if (location != null) {
-                            Log.i("getLocation", "last GPS location is not null");
-                            setLongitude(location.getLongitude());
-                            setLatitude(location.getLatitude());
-                            Log.i("coord", Double.toString(latitude));
-                            Log.i("coord", Double.toString(longitude));
-                       }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("getLocation", "Error trying to get last GPS location");
-                    }
-                });
-
-    }
-    */
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
@@ -225,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     private void setupSeekBarPreferences(){
         SharedPreferences seekBarPreference = PreferenceManager.getDefaultSharedPreferences(this);
-        //maxPrice = String.valueOf(prefs.getInt(context.getString(R.string.max_price_key), 150));
+
         String radiusString = String.valueOf(seekBarPreference.getInt(this.getString(R.string.pref_Distance_key), 2));
         radius= Integer.valueOf(radiusString)*1000;
         Log.i("radius",String.valueOf(radius));

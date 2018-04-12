@@ -3,7 +3,6 @@
 
     <SeekBarPreference
         android:key="@string/pref_Distance_key"
-        android:title="@string/pref_Distance_label"
         android:max="50"
-        />
+        android:title="@string/pref_Distance_label" />
 </PreferenceScreen>

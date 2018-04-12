@@ -2,6 +2,7 @@ package com.mathiascraeghs.foodtracker;
 
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class ChildActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -71,12 +73,28 @@ public class ChildActivity extends AppCompatActivity implements OnMapReadyCallba
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.mapstyle));
+
+            if (!success) {
+                Log.i("map", "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.i("map", "Can't find style. Error: ");
+        }
+
+
         LatLng location = new LatLng(latI,lngI);
         googleMap.addMarker(new MarkerOptions()
                 .position(location)
                 .title(nameR));
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(15));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+
     }
 
 }
